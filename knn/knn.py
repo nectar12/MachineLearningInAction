@@ -41,11 +41,39 @@ def file2matrix(filename):
         index += 1
     return returnMat, classLabelVector
 
+def autoNorm(dataSet):
+    minVals = dataSet.min(0)
+    maxVals = dataSet.max(0)
+    ranges = maxVals - minVals
+    normDataSet = zeros(shape(dataSet))
+    m = dataSet.shape[0]
+    normDataSet = dataSet - tile(minVals, (m,1))
+    normDataSet = normDataSet /tile(ranges, (m,1))
+    return normDataSet, ranges, minVals
+
+def datingClassTest():
+    hoRatio = 0.1
+    datingDataMat, datingLabels = file2matrix('./data/datingTestSet.txt')
+    normMat, ranges, minVals = autoNorm(datingDataMat)
+    m = normMat.shape[0]
+    numTestVecs = int( m * hoRatio)
+    errorCount = 0.0
+    for i in range(numTestVecs):
+        classifierResult = classify0(normMat[i,:], normMat[numTestVecs:m,:], \
+                datingLabels[numTestVecs:m], 3)
+        print "the classifier came back with : %d, the real answer is :%d" \
+                %(classifierResult, datingLabels[i])
+        if (classifierResult != datingLabels[i]) : errorCount += 1.0
+    print "the total error rate is: %f" %(errorCount / float(numTestVecs))
+
 
 if __name__ == '__main__':
+    '''
     datingDataMat, datingLabels = file2matrix('./data/datingTestSet.txt')
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.scatter(datingDataMat[:,1], datingDataMat[:,2])
+    ax.scatter(datingDataMat[:,1], datingDataMat[:,2],
+            15.0*array(datingLabels), 15.0*array(datingLabels))
     plt.show()
-
+    '''
+    datingClassTest()
